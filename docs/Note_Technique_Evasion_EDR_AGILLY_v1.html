@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<title>Vecteurs d'Évasion EDR &amp; Architecture de Durcissement — AGILLY Cyberdéfense</title>
+<style>
+  :root {
+    --orange:#F58732;
+    --anthracite:#191919;
+    --bloc:#1C1C1C;
+    --bloc-int:#2B2B2B;
+    --creme:#FFF7F0;
+    --creme-bord:#F2C9A3;
+    --texte:#1F1F1F;
+    --gris:#767676;
+    --filet:#DDDDDD;
+    --cellule:#F7F7F7;
+  }
+  * { box-sizing:border-box; }
+  html, body, .hero, .badge, .chaine, .chaine-titre, .etape, .axe-titre, thead th, .encadre, .col3,
+  .chiffre, .refs, .signature {
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  body {
+    font-family:'Eurostyle','Eurostile','Square721 BT',Arial,Helvetica,sans-serif;
+    color:var(--texte); background:#FFF; margin:0;
+    font-size:13.5px; line-height:1.55;
+  }
+  .page { max-width:820px; margin:0 auto; padding:34px 40px 90px 40px; }
+
+  /* ---------- En-tête de marque ---------- */
+  .marque { display:flex; align-items:baseline; justify-content:space-between; }
+  .marque .logo { font-size:30px; font-weight:bold; letter-spacing:-1px; color:var(--anthracite); }
+  .marque .logo span { color:var(--orange); }
+  .marque .entite { font-size:13px; font-weight:bold; letter-spacing:1.5px; color:var(--anthracite); }
+  .marque .entite span { color:var(--orange); }
+  .filet-marque { height:2px; background:var(--orange); margin:10px 0 22px 0; }
+
+  /* ---------- Bloc de couverture ---------- */
+  .hero { background:var(--bloc); border-left:6px solid var(--orange); color:#FFF; padding:22px 26px 24px 26px; }
+  .badge { display:inline-block; background:var(--orange); color:var(--anthracite);
+           font-size:9.5px; font-weight:bold; letter-spacing:2px; text-transform:uppercase;
+           padding:4px 10px; margin-bottom:14px; }
+  .hero h1 { font-size:23px; line-height:1.25; margin:0 0 18px 0; color:#FFF; }
+  .hero hr { border:none; border-top:1px solid #3A3A3A; margin:0 0 16px 0; }
+  .meta { display:flex; gap:34px; flex-wrap:wrap; }
+  .meta > div { flex:1; min-width:150px; }
+  .lbl { font-size:9px; font-weight:bold; letter-spacing:2px; text-transform:uppercase;
+         color:var(--orange); margin-bottom:4px; }
+  .val { font-size:12px; color:#D8D8D8; line-height:1.5; }
+  .perimetre { margin-top:16px; }
+
+  /* ---------- Encadré crème ---------- */
+  .encadre { background:var(--creme); border-left:4px solid var(--orange); padding:13px 16px;
+             font-size:12.5px; margin:16px 0 24px 0; }
+  .encadre p { margin:0 0 8px 0; }
+  .encadre p:last-child { margin:0; }
+  .cle { color:#C4671A; font-weight:bold; }
+
+  /* ---------- Titres ---------- */
+  h2 { font-size:16px; margin:26px 0 10px 0; padding-left:12px; position:relative; }
+  h2::before { content:''; position:absolute; left:0; top:2px; bottom:2px; width:4px; background:var(--orange); }
+  h3 { font-size:13.5px; margin:20px 0 7px 0; }
+  h4 { font-size:12.5px; margin:16px 0 6px 0; }
+  p { margin:0 0 10px 0; }
+  ul { margin:0 0 10px 0; padding-left:18px; }
+  li { margin-bottom:6px; }
+  code { font-family:Consolas,'Courier New',monospace; font-size:11.5px; }
+  .petit { font-size:11.5px; color:var(--gris); }
+
+  /* ---------- Schéma de chaîne ---------- */
+  .chaine-titre { background:var(--orange); color:#FFF; font-size:10px; font-weight:bold;
+                  letter-spacing:2px; text-transform:uppercase; text-align:center; padding:6px 10px; }
+  .chaine { background:var(--bloc); padding:16px; margin-bottom:18px; }
+  .rangee { display:flex; align-items:stretch; gap:8px; }
+  .etape { flex:1; background:var(--bloc-int); padding:10px 12px; text-align:center; }
+  .etape.actif { border-left:3px solid var(--orange); text-align:left; }
+  .etape b { display:block; color:#FFF; font-size:11.5px; line-height:1.35; margin-bottom:4px; }
+  .etape span { font-size:10.5px; color:#A8A8A8; line-height:1.35; }
+  .etape.actif span { color:var(--orange); }
+  .fleche { align-self:center; color:var(--orange); font-size:15px; }
+  .fleche-bas { text-align:center; color:var(--orange); font-size:15px; margin:6px 0; }
+
+  /* ---------- Tableaux de matrice ---------- */
+  .axe-titre { background:var(--bloc); color:#FFF; font-size:12px; font-weight:bold;
+               padding:7px 12px; margin:24px 0 0 0; }
+  table { border-collapse:collapse; width:100%; margin:0 0 6px 0; }
+  thead th { background:#333333; color:#FFF; font-size:10.5px; font-weight:bold;
+             text-align:left; padding:7px 10px; border:1px solid #333333; }
+  tbody td { border:1px solid var(--filet); padding:9px 10px; font-size:12px; vertical-align:top; }
+  tbody td:first-child { width:21%; }
+  tbody td.col3 { width:26%; background:var(--cellule); }
+  .tag { font-style:italic; color:var(--gris); }
+
+  /* ---------- Chiffre clé ---------- */
+  .chiffre { background:var(--bloc); color:#D8D8D8; padding:16px 20px; margin:14px 0 18px 0; font-size:12px; }
+  .chiffre .tete { margin-bottom:10px; }
+  .chiffre .nb { color:var(--orange); font-size:24px; font-weight:bold; letter-spacing:-0.5px; }
+  .chiffre .lg { color:#FFF; font-size:12.5px; }
+  .chiffre .lg b { color:var(--orange); }
+  .chiffre p { margin:0; line-height:1.55; }
+  .chiffre strong { color:var(--orange); }
+
+  /* ---------- Panneau de références ---------- */
+  .refs { background:#FAFAFA; border:1px solid #E8E8E8; padding:16px 20px; margin:12px 0 24px 0; }
+  .refs .src { color:var(--orange); font-weight:bold; font-size:12.5px; margin:14px 0 5px 0; }
+  .refs .src:first-child { margin-top:0; }
+  .refs ul { margin:0; padding-left:16px; }
+  .refs li { font-size:12px; margin-bottom:5px; }
+
+  /* ---------- Pied de page ---------- */
+  .pied { position:fixed; left:0; right:0; bottom:0; padding:8px 40px;
+          border-top:1px solid var(--filet); background:#FFF;
+          font-size:10px; color:#9A9A9A; display:flex; justify-content:space-between; }
+  .signature { background:var(--bloc); border-left:6px solid var(--orange); color:#FFF;
+               padding:14px 20px; margin-top:26px; display:flex; align-items:center;
+               justify-content:space-between; flex-wrap:wrap; gap:12px; }
+  .signature .nom { font-size:13.5px; font-weight:bold; letter-spacing:1.5px; }
+  .signature .bl { font-size:11.5px; color:#B0B0B0; margin-top:3px; }
+  .signature .contact { font-size:11.5px; color:#FFF; }
+  .signature .contact .web { color:var(--orange); margin-left:16px; }
+
+  @page { size:A4; margin:14mm 0 16mm 0; }
+  @media print {
+    body { font-size:10pt; }
+    .page { padding:0 14mm 0 14mm; max-width:100%; }
+    h2, h3, h4, .axe-titre, .chaine-titre { page-break-after:avoid; }
+    table, .chaine, .encadre, .hero, .signature, .chiffre { page-break-inside:avoid; }
+    tbody tr { page-break-inside:avoid; }
+    a { color:inherit; text-decoration:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="marque">
+    <div class="logo">agill<span>y</span></div>
+    <div class="entite">AGILLY <span>CYBERDÉFENSE</span></div>
+  </div>
+  <div class="filet-marque"></div>
+
+  <div class="hero">
+    <div class="badge">Note technique d'ingénierie</div>
+    <h1>Vecteurs d'Évasion EDR &amp; Architecture de Durcissement</h1>
+    <hr />
+    <div class="meta">
+      <div>
+        <div class="lbl">Auteur</div>
+        <div class="val">Agilly Cyberdéfense</div>
+      </div>
+      <div>
+        <div class="lbl">Public cible</div>
+        <div class="val">Responsables SOC, DFIR, ingénieurs sécurité</div>
+      </div>
+      <div>
+        <div class="lbl">Version</div>
+        <div class="val">v1.0 — 15 septembre 2026</div>
+      </div>
+    </div>
+    <div class="perimetre">
+      <div class="lbl">Périmètre</div>
+      <div class="val">Postes de travail et serveurs Windows : Windows 10 22H2, Windows 11 22H2+,
+      Windows Server 2016 et ultérieur. Hors périmètre : hyperviseurs (ESXi), Linux, consoles de
+      sauvegarde et d'administration.</div>
+    </div>
+  </div>
+
+  <div class="encadre">
+    <p>Ce document décrit un <span class="cle">socle de durcissement mesurable</span>. Un socle conforme
+    réduit la surface d'attaque ; il ne garantit pas qu'un agent ne puisse être neutralisé. La validation
+    de la <span class="cle">résistance effective</span> relève d'un test contrôlé en environnement isolé,
+    distinct du présent audit de socle.</p>
+  </div>
+
+  <h2>1. Contexte opérationnel</h2>
+
+  <p>Un agent EDR observe le système depuis deux positions : en <strong>espace utilisateur</strong>, par
+  injection de bibliothèques dans les processus pour intercepter les appels système sensibles ; en
+  <strong>mode noyau</strong>, par enregistrement de routines de notification (<em>kernel callbacks</em>)
+  qui signalent la création de processus, le chargement d'images mémoire et l'ouverture de descripteurs
+  d'accès. Les techniques du §2 visent ces deux positions, non les moteurs de détection.</p>
+
+  <p>Le déplacement est documenté : AuKill (Sophos X-Ops, avril 2023) détourne un pilote signé légitime
+  pour terminer des processus de sécurité ; EDRKillShifter (août 2024, groupe RansomHub) sélectionne
+  dynamiquement un pilote vulnérable selon la protection rencontrée. Références au §6. En exploitation,
+  la rupture ne se présente pas comme une alerte mais comme une absence de données, souvent qualifiée en
+  incident de connectivité — d'où le §5.</p>
+
+  <p>Deux prérequis déplacent le centre de gravité. L'évasion noyau suppose des <strong>privilèges
+  administrateur local ou SYSTEM déjà acquis</strong> (axe 1 du §3). Et le point d'entrée dominant reste
+  la <strong>compromission d'identité</strong>, puis d'une console d'administration exposée
+  <strong>sans MFA</strong> : §2.D, hors périmètre de l'audit local.</p>
+
+  <h2>2. Analyse des vecteurs d'évasion critiques</h2>
+
+  <div class="chaine-titre">Chaîne d'exploitation par évasion noyau (BYOVD)</div>
+  <div class="chaine">
+    <div class="rangee">
+      <div class="etape"><b>Compte admin local / SYSTEM</b><span>Prérequis : privilèges déjà acquis</span></div>
+      <div class="fleche">&rarr;</div>
+      <div class="etape"><b>Dépôt d'un pilote vulnérable</b><span>Signature valide — DSE satisfait</span></div>
+      <div class="fleche">&rarr;</div>
+      <div class="etape"><b>Primitive d'exploitation Ring 0</b><span>Lecture / écriture en mémoire noyau</span></div>
+    </div>
+    <div class="fleche-bas">&darr;</div>
+    <div class="rangee">
+      <div class="etape actif"><b>Perte de télémétrie</b><span>Signal détectable par le SOC</span></div>
+      <div class="fleche">&larr;</div>
+      <div class="etape"><b>Terminaison / cécité de l'agent</b><span>Agent EDR neutralisé</span></div>
+      <div class="fleche">&larr;</div>
+      <div class="etape"><b>DKOM &amp; décrochage</b><span>Altération des kernel callbacks</span></div>
+    </div>
+  </div>
+
+  <h3>A. Exploitation par pilotes vulnérables (BYOVD — <em>Bring Your Own Vulnerable Driver</em>)</h3>
+
+  <p>Windows impose la signature numérique de tout pilote chargé en mode noyau (<em>Driver Signature
+  Enforcement — DSE</em>). L'attaquant ne contourne pas cette règle : il l'exploite.</p>
+  <ul>
+    <li>Il implante un pilote <strong>officiel, légitimement signé</strong> et validé par Microsoft
+    (souvent un ancien utilitaire de diagnostic matériel), qui embarque une faille documentée offrant une
+    primitive de lecture/écriture arbitraire en Ring 0.</li>
+    <li>Il manipule alors directement les structures internes du noyau (<em>Direct Kernel Object
+    Manipulation — DKOM</em>) : décrochage des routines de rappel (<code>PsSetCreateProcessNotifyRoutine</code>,
+    <code>ObRegisterCallbacks</code>), altération des tables d'accès, terminaison des threads des processus
+    protégés.</li>
+  </ul>
+
+  <p><strong>Point de durcissement à retenir :</strong> cette chaîne n'exécute pas de code non signé —
+  elle <strong>satisfait</strong> le DSE et manipule des <strong>données</strong> noyau. Cela a une
+  conséquence directe sur la matrice du §3 : HVCI protège l'intégrité du <em>code</em>, pas des
+  <em>données</em>, et n'arrête donc pas cette chaîne (voir §3, axe 2, et la donnée de référence en §6).</p>
+
+  <p>Deux traces exploitables subsistent et sont contrôlées par l'audit : le pilote déposé reste
+  identifiable par son empreinte, et l'assaillant l'efface fréquemment du disque après chargement — un
+  module chargé dont le fichier a disparu est un indicateur en soi.</p>
+
+  <p class="petit">Outils répertoriés : AuKill, EDRKillShifter, Terminator, RealBlindingEDR.</p>
+
+  <h3>B. Neutralisation des points d'instrumentation (ETW &amp; AMSI)</h3>
+
+  <p><strong>ETW</strong> (<em>Event Tracing for Windows</em>) est un mécanisme de <strong>traçage
+  d'événements</strong> — non une « télémétrie mémoire ». <strong>AMSI</strong> (<em>Antimalware Scan
+  Interface</em>) expose aux moteurs d'analyse le contenu des scripts et du code chargé dynamiquement
+  (PowerShell, macros, .NET). Dans un processus qu'il contrôle, l'assaillant patche en mémoire le stub
+  <code>EtwEventWrite</code> et l'entrée AMSI (retour immédiat, opcode <code>0xC3</code>) : le code
+  s'exécute sans être analysé et <strong>sans alerte comportementale</strong>. Durcissement : axe 5 du §3.</p>
+
+  <h3>C. Abus des mécanismes d'administration (<em>Living off the Land</em>)</h3>
+  <ul>
+    <li><strong>Désynchronisation logicielle</strong> : exploitation des fenêtres de mise à niveau ou de
+    rétrogradation d'agents pour interrompre l'exécution avant la réinitialisation de l'anti-sabotage.</li>
+    <li><strong>Détournement des outils natifs</strong> : usage de <code>gpscript.exe</code>,
+    <code>wmic.exe</code>, <code>sc.exe</code> avec des privilèges administratifs pour désactiver la
+    protection ou injecter des exclusions.</li>
+    <li><strong>Redémarrage en mode sans échec</strong> : contournement classique de l'anti-sabotage, les
+    services de sécurité n'y étant pas tous démarrés.</li>
+  </ul>
+
+  <h3>D. Compromission de la console d'administration</h3>
+
+  <p>Vecteur distinct, et souvent <strong>le premier</strong> : l'accès à la console de gestion de l'EDR
+  par identifiants d'administrateur volés, en <strong>l'absence de MFA</strong>. Il permet de créer des
+  exclusions globales, de désactiver l'anti-sabotage ou de désinstaller l'agent proprement, à l'échelle du
+  tenant, <strong>sans aucune exploitation technique</strong>. Ce risque est majeur pour tout environnement
+  multi-tenant et impose MFA, moindre privilège et journalisation des actions d'administration. Il sort du
+  périmètre mesurable côté poste : aucun contrôle local ne le détecte, ce qui en fait un point de revue
+  d'architecture et non d'audit de socle.</p>
+
+  <h2>3. Matrice de durcissement opérationnel</h2>
+
+  <p>L'élévation du niveau de résistance exige l'activation conjointe des mécanismes suivants, organisés
+  par axe. La colonne <em>Limite / condition</em> énonce ce que chaque mesure ne couvre pas — condition
+  d'un déploiement honnête.</p>
+
+  <div class="axe-titre">Axe 1 — Privilèges &amp; socle (le premier maillon)</div>
+  <table>
+    <thead><tr><th>Mécanisme</th><th>Action de durcissement</th><th>Limite / condition</th></tr></thead>
+    <tbody>
+      <tr><td>Administrateurs locaux</td><td>Restreindre l'appartenance ; proscrire comptes de service et utilisateurs en admin local.</td><td class="col3">Mesure la moins coûteuse — c'est elle qui fait s'effondrer toute la chaîne du §2.</td></tr>
+      <tr><td>LAPS</td><td>Mots de passe administrateur local uniques, gérés et renouvelés.</td><td class="col3">—</td></tr>
+      <tr><td>UAC</td><td>Élévation avec consentement ; interdiction de la désactivation.</td><td class="col3">—</td></tr>
+      <tr><td>Secure Boot</td><td>Chaîne de démarrage vérifiée dès le firmware.</td><td class="col3">Prérequis : UEFI, absence de CSM.</td></tr>
+      <tr><td>Options de démarrage du noyau</td><td>Proscrire <code>testsigning</code>, <code>nointegritychecks</code> et le débogage noyau en production.</td><td class="col3">Un poste laissé en <em>test-signing</em> accepte un pilote non signé : la chaîne du §2 n'a même plus besoin d'un pilote vulnérable.</td></tr>
+      <tr><td>Protection DMA du noyau</td><td>Bloquer l'accès mémoire direct par les ports externes.</td><td class="col3">Prérequis matériels ; complémentaire de VBS.</td></tr>
+      <tr><td>Démarrage en mode sans échec</td><td>Bloquer / superviser le boot en mode sans échec.</td><td class="col3">Contournement fréquent de l'anti-sabotage — souvent oublié.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="axe-titre">Axe 2 — Anti-BYOVD : empêcher le chargement, contraindre l'exécution, détecter le déjà-présent</div>
+  <table>
+    <thead><tr><th>Mécanisme</th><th>Action de durcissement</th><th>Limite / condition</th></tr></thead>
+    <tbody>
+      <tr><td>Microsoft Vulnerable Driver Blocklist</td><td>Bloquer les pilotes vulnérables connus (profil MDM/Intune ou GPO).</td><td class="col3">Liste mise à jour lentement et contournable par une variante recompilée du même pilote.</td></tr>
+      <tr><td>WDAC par signataire <span class="tag">(cible — politique auditée)</span></td><td>N'autoriser que des pilotes explicitement approuvés.</td><td class="col3">Contrôle préventif de référence. Coût de mise en œuvre ; phase d'audit requise. La politique en vigueur est lue et restituée par l'audit.</td></tr>
+      <tr><td>Inventaire par empreinte des pilotes tiers <span class="tag">(référentiel Agilly)</span></td><td>Détecter un pilote vulnérable <strong>déjà installé</strong> — angle mort de l'ASR et de la blocklist.</td><td class="col3">Détection d'un échantillon précis ; non préventif (cf. §6).</td></tr>
+      <tr><td>Validité de signature des pilotes chargés</td><td>Vérifier qu'aucun pilote en exécution ne porte une signature non valide.</td><td class="col3">Contrôle de détection ; une signature valide ne dit rien de la vulnérabilité du pilote.</td></tr>
+      <tr><td>Pilotes et minifiltres en exécution sans fichier sur disque</td><td>Relever les modules chargés dont le fichier a disparu.</td><td class="col3">Indicateur d'évasion, non de durcissement : le mode opératoire du §2.A prévoit l'effacement du pilote après chargement.</td></tr>
+      <tr><td>VBS + HVCI</td><td>Intégrité du code exécuté en Ring 0.</td><td class="col3">HVCI protège l'intégrité du <strong>code, pas des données noyau</strong>. Il ne bloque ni un pilote signé valide ni la manipulation DKOM. Preuve empirique : le sous-ensemble du référentiel Agilly annoté « chargé avec HVCI actif » (§6).</td></tr>
+      <tr><td>Règle ASR « pilotes signés vulnérables exploités »</td><td>Empêcher l'écriture du pilote sur le disque.</td><td class="col3">Ne bloque pas un pilote déjà présent. <strong>Inapplicable si Defender n'est pas l'antivirus actif</strong> (bascule en mode passif dès qu'un agent tiers est en protection primaire).</td></tr>
+    </tbody>
+  </table>
+
+  <div class="axe-titre">Axe 3 — Isolement des secrets</div>
+  <table>
+    <thead><tr><th>Mécanisme</th><th>Action de durcissement</th><th>Limite / condition</th></tr></thead>
+    <tbody>
+      <tr><td>LSA Protection (RunAsPPL)</td><td>Exécuter <code>lsass.exe</code> en <em>Protected Process Light</em> contre l'injection et la lecture mémoire.</td><td class="col3">Contournable par BYOVD ; casse certains fournisseurs d'authentification et outils DLP → <strong>déploiement en mode audit obligatoire d'abord</strong>.</td></tr>
+      <tr><td>Credential Guard (VBS)</td><td>Isolement des secrets d'authentification par virtualisation.</td><td class="col3">Prérequis matériels ; incompatibilités à vérifier au préalable.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="axe-titre">Axe 4 — Intégrité de l'agent</div>
+  <table>
+    <thead><tr><th>Mécanisme</th><th>Action de durcissement</th><th>Limite / condition</th></tr></thead>
+    <tbody>
+      <tr><td>Tamper Protection</td><td>Anti-sabotage activé et verrouillé côté console, non modifiable localement.</td><td class="col3">Doit être piloté centralement.</td></tr>
+      <tr><td>Verrou de désinstallation</td><td>Mot de passe centralisé / double validation.</td><td class="col3">Standard de forte maturité — à atteindre par paliers.</td></tr>
+      <tr><td>Protection temps réel &amp; fraîcheur des signatures</td><td>Surveillées en continu.</td><td class="col3">—</td></tr>
+    </tbody>
+  </table>
+
+  <div class="axe-titre">Axe 5 — Visibilité mémoire &amp; scripts (réponse au §2.B)</div>
+  <table>
+    <thead><tr><th>Mécanisme</th><th>Action de durcissement</th><th>Limite / condition</th></tr></thead>
+    <tbody>
+      <tr><td>ETW-TI (Threat Intelligence)</td><td>Traçage protégé, résistant au patch ETW en espace utilisateur.</td><td class="col3">—</td></tr>
+      <tr><td>Fournisseurs AMSI à jour</td><td>Analyse du contenu dynamique (scripts, macros, .NET).</td><td class="col3">—</td></tr>
+      <tr><td>Journalisation ScriptBlock + modules, transcription</td><td>Tracer l'exécution PowerShell.</td><td class="col3">Filet de sécurité utile, non inviolable : le patch d'<code>EtwEventWrite</code> en mémoire réduit la portée de la journalisation dans le processus concerné.</td></tr>
+      <tr><td>Désactivation de PowerShell v2</td><td>Supprimer un moteur dépourvu d'AMSI et de journalisation.</td><td class="col3">—</td></tr>
+      <tr><td>Mode de langage restreint <span class="tag">(cible)</span></td><td>Réduire la surface d'exécution de script.</td><td class="col3">Impact applicatif à valider.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="axe-titre">Axe 6 — Télémétrie &amp; collecte indépendante</div>
+  <table>
+    <thead><tr><th>Mécanisme</th><th>Action de durcissement</th><th>Limite / condition</th></tr></thead>
+    <tbody>
+      <tr><td>Rattachement console + export SIEM</td><td>Corrélation centralisée de la télémétrie.</td><td class="col3">Le rattachement déclaré localement ne prouve pas la remontée : les deux points sont contrôlés séparément.</td></tr>
+      <tr><td>Exclusions antivirus</td><td>Inventorier et justifier chaque exclusion.</td><td class="col3">Vecteur d'aveuglement le moins coûteux pour un attaquant disposant de la console (§2.D).</td></tr>
+      <tr><td>Collecteur d'événements indépendant (WEF)</td><td>Collecter les journaux hors de l'agent.</td><td class="col3">Prérequis d'architecture : un agent neutralisé ne remonte plus ses propres journaux — sans collecte hors agent, la preuve de la neutralisation disparaît avec l'agent.</td></tr>
+      <tr><td>Rétention du journal Sécurité</td><td>Dimensionner la rétention pour couvrir la fenêtre d'investigation.</td><td class="col3">Une rétention courte réduit la portée de l'axe 7.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="axe-titre">Axe 7 — Traces et historique (30 jours)</div>
+  <p style="margin-top:10px">Les six axes précédents photographient un état à l'instant T. <strong>Une
+  machine dont la protection a été désactivée puis réactivée présente un état conforme et une histoire qui
+  ne l'est pas.</strong></p>
+  <table>
+    <thead><tr><th>Mécanisme</th><th>Action de durcissement</th><th>Limite / condition</th></tr></thead>
+    <tbody>
+      <tr><td>Arrêts de services de sécurité</td><td>Relever les arrêts et plantages sur 30 jours.</td><td class="col3">Ne couvre pas la terminaison depuis le noyau (§2.A), qui ne transite pas par le gestionnaire de services.</td></tr>
+      <tr><td>Désactivations de protection</td><td>Relever les désactivations de protection temps réel et d'anti-sabotage.</td><td class="col3">Dépend de la journalisation de l'éditeur en place.</td></tr>
+      <tr><td>Installation de pilotes noyau</td><td>Relever les nouveaux services de type pilote.</td><td class="col3">Le bruit légitime (mises à jour, pilotes matériels) doit être qualifié.</td></tr>
+      <tr><td>Refus de chargement de pilotes</td><td>Relever les refus opposés par l'intégrité du code.</td><td class="col3">Signal de valeur : une tentative bloquée est une tentative.</td></tr>
+      <tr><td>Intégrité des journaux</td><td>Détecter un effacement du journal Sécurité.</td><td class="col3">L'effacement est lui-même l'événement le plus significatif.</td></tr>
+      <tr><td>Collecteur indépendant (WEF)</td><td>Vérifier l'existence d'un abonnement réel de collecte hors agent.</td><td class="col3">Sans lui, cet axe disparaît en même temps que la machine.</td></tr>
+    </tbody>
+  </table>
+
+  <p style="margin-top:10px">La fenêtre est bornée par la rétention configurée du journal, ce qui fait de
+  cette rétention un point de durcissement à part entière (axe 6).</p>
+
+  <h2>4. Script d'audit de conformité socle</h2>
+
+  <p>L'évaluation de ce socle est outillée par un script PowerShell d'audit en libre accès, publié sur
+  GitHub — <a href="https://github.com/AGILLY-BU-CYBERDEFENSE/audit-evasion-edr"><code>https://github.com/AGILLY-BU-CYBERDEFENSE/audit-evasion-edr</code></a>. Il s'exécute en lecture
+  seule et peut être relu intégralement avant toute exécution.</p>
+
+  <ul>
+    <li><strong>Objet</strong> — évaluer, en lecture seule, l'état du socle de durcissement d'un poste
+    Windows au regard des vecteurs ci-dessus.</li>
+    <li><strong>Couverture</strong> — plusieurs dizaines de contrôles techniques, regroupés en huit
+    familles dans le rapport : socle firmware, intégrité noyau, anti-BYOVD, intégrité de l'agent,
+    télémétrie, historique des journaux, privilèges, réduction de surface. Ces familles ne recouvrent pas
+    exactement les axes du §3 : le §3 organise des <strong>mesures de durcissement</strong>, le rapport
+    organise des <strong>contrôles mesurables</strong>. L'axe 3 est ainsi restitué dans la famille
+    « intégrité noyau ». L'inventaire anti-BYOVD couvre tous les pilotes noyau en exécution qui ne sont
+    pas édités par Microsoft, <strong>y compris ceux signés WHQL ou par attestation</strong> : le sujet
+    de ces certificats porte <code>O=Microsoft Corporation</code> alors qu'il s'agit de pilotes tiers
+    contresignés — la classe même qu'exploite le BYOVD. Les minifiltres non enregistrés comme services
+    sont comparés séparément.</li>
+    <li><strong>Verdicts</strong> — <code>CONFORME</code>, <code>CONFORME (PRÉSUMÉ)</code>,
+    <code>NON CONFORME</code>, <code>INDÉTERMINÉ</code>, <code>NON APPLICABLE</code> (ex. ligne ASR quand
+    Defender est passif), <code>CONFIGURÉ (NON ACTIF)</code>, <code>INFORMATION</code>,
+    <code>À VÉRIFIER EN CONSOLE</code>.</li>
+    <li><strong>Innocuité</strong> — lecture seule du système, aucun appel réseau, aucune donnée ne quitte
+    la machine. Les seules écritures sont les livrables, dans le profil utilisateur.</li>
+    <li><strong>Référentiel d'empreintes</strong> — le fichier <code>AGILLY_LOLDrivers_Empreintes.csv</code>
+    se place dans le dossier du script, qui le détecte seul. Il est facultatif : sans lui, la correspondance
+    d'empreintes sort en <code>INDÉTERMINÉ</code> et les autres contrôles sont inchangés.</li>
+    <li><strong>Restitution</strong> — rapport HTML autonome (feuille d'impression prévue pour un PDF
+    propre), export CSV pour consolidation de parc, corrélation MITRE ATT&amp;CK par contrôle.</li>
+  </ul>
+
+  <h3>Lecture des résultats</h3>
+
+  <p><strong>À vérifier en console.</strong> Cet état désigne un point qui ne peut être tranché que depuis
+  la console de l'éditeur. Il ne pénalise ni le score ni la couverture d'audit : un poste sous agent tiers
+  n'est pas artificiellement dégradé par rapport à un poste sous Defender for Endpoint, dont certains états
+  sont lisibles localement.</p>
+
+  <p><strong>Couverture d'audit.</strong> Le rapport affiche, distinctement du score, la proportion de
+  contrôles réellement évalués. <strong>Un « aucun écart » obtenu sur une couverture faible n'est pas un
+  état sain</strong> : sous le seuil, l'audit est déclaré non concluant et le code de sortie le signale,
+  afin qu'un résultat partiel ne soit jamais restitué comme une conformité. En consolidation de parc, la
+  couverture se lit toujours avec le verdict.</p>
+
+  <p><strong>Lecture ATT&amp;CK.</strong> Chaque contrôle porte les identifiants de technique qu'il
+  contraint ou dont il détecte la trace. Le rattachement qualifie le contrôle, pas la machine : il ne
+  signifie pas que la technique a été observée sur le poste audité.</p>
+
+  <div class="encadre">
+    <p><strong>Hypothèse de validité.</strong> Les contrôles lisent l'état de la machine par les
+    interfaces que Windows expose : registre, WMI, gestionnaire de services, journaux, variables de
+    firmware relayées par le noyau. C'est donc le système audité qui rend son propre verdict — <em>a
+    fortiori</em> pour HVCI, Credential Guard et la protection LSA, dont l'état est rapporté à travers le
+    noyau qu'ils décrivent. C'est la limite de tout audit en ligne, non une faiblesse de l'outil :
+    établir qu'une machine n'est pas compromise suppose une analyse hors ligne ou une télémétrie collectée
+    ailleurs (axe 6). L'outil répond à « mon socle est-il durci ? », jamais à « ai-je été compromis ? ».</p>
+  </div>
+
+  <h3>Prérequis et intégrité</h3>
+
+  <p><strong>Prérequis d'exécution.</strong> Windows 10 / Server 2016 ou ultérieur, PowerShell 5.1, console
+  64 bits (une console 32 bits sur un système 64 bits fausse l'inventaire des pilotes ; le script le
+  détecte et le signale), session élevée. L'inventaire des pilotes noyau ajoute 20 à 60 secondes.</p>
+
+  <p><strong>Intégrité des livrables.</strong> Script et référentiel sont publiés avec leur empreinte
+  SHA256 et un fichier <code>.sha256</code> adjacent, que le script reprend pour vérifier la liste avant
+  usage : une liste tronquée ferait autrement ressortir tous les pilotes comme sains. Cette vérification
+  atteste l'intégrité au transport, non l'authenticité — qui remplace le fichier remplace l'empreinte
+  posée à côté. Pour l'authenticité, comparer aux valeurs ci-dessous.</p>
+
+  <table>
+    <thead><tr><th style="width:34%">Fichier</th><th>SHA256</th></tr></thead>
+    <tbody>
+      <tr><td><code>Audit-SocleEvasionEDR-v1.ps1</code></td><td style="font-family:Consolas,monospace;font-size:10.5px;word-break:break-all">1651af4b6f857258d7dc6ff10b4724f7696c85a195f004a27e7a2adffda40f92</td></tr>
+      <tr><td><code>AGILLY_LOLDrivers_Empreintes.csv</code></td><td><code>8068aba6cd9167a898f530f2d5212be0a7bc0290b0320e33cb76b673075b0c2c</code></td></tr>
+    </tbody>
+  </table>
+
+  <p style="margin-top:10px"><strong>Comportement attendu côté EDR.</strong> Le script énumère les pilotes
+  noyau chargés et calcule leurs empreintes ; une alerte de votre agent sur cette activité est normale et
+  attendue. Aucun binaire n'est déposé, aucun pilote n'est chargé, aucune connexion réseau n'est ouverte.</p>
+
+  <h2>5. Exigences d'ingénierie SOC : gestion des ruptures de télémétrie</h2>
+
+  <p>La détection d'une neutralisation d'agent repose sur la surveillance des signaux faibles
+  d'infrastructure. Trois règles, avec les conditions techniques que chacune suppose.</p>
+
+  <h4>1. Règle de corrélation sur perte de signal (heartbeat) : des seuils segmentés</h4>
+  <ul>
+    <li><strong>Serveurs de production</strong> : alerte de sévérité haute au-delà de 15 min de silence
+    sans maintenance programmée (seuil tenable).</li>
+    <li><strong>Postes fixes</strong> : seuil adapté aux plages d'exploitation.</li>
+    <li><strong>Postes nomades</strong> : ne pas alarmer sur un seuil brut (veille, VPN, déplacements) —
+    corréler l'absence de signal EDR avec un signal d'activité indépendant (authentification, présence
+    réseau).</li>
+  </ul>
+  <p><strong>Faisabilité par plateforme</strong> : le seuil natif d'inactivité de MDE se compte en jours.
+  Une détection à 15 min suppose une requête <em>Advanced Hunting</em> périodique ou une collecte API, un
+  pipeline SIEM et une supervision continue — donc un développement spécifique à chaque plateforme.</p>
+
+  <h4>2. Surveillance des événements de désenregistrement : portée réelle</h4>
+  <p>Les Event ID 7036 / 7040 signalent l'arrêt ou l'altération d'un service : ils couvrent le §2.C. Ils
+  <strong>ne couvrent pas</strong> la terminaison depuis le noyau (§2.A), qui ne transite pas par le
+  gestionnaire de services et ne génère aucun 7036/7040. Prérequis d'architecture associé : un collecteur
+  indépendant (WEF), un agent mort ne transmettant plus ses journaux.</p>
+  <p>Le script d'audit exploite déjà cette famille d'événements en lecture rétrospective sur 30 jours :
+  arrêt de service de sécurité (7036 / 7040), installation d'un service de type pilote (7045),
+  désactivation de protection côté Defender, refus de chargement opposé par l'intégrité du code, effacement
+  du journal Sécurité (1102). <strong>C'est un point d'entrée sans SIEM</strong> : ce qui est ici constaté
+  a posteriori sur une machine est ce que la règle de corrélation doit voir en temps réel sur le parc.</p>
+
+  <h4>3. Réponse automatisée (SOAR) — garde-fous obligatoires</h4>
+  <p>Sans garde-fous, une panne de console éditeur ou une coupure WAN isolerait le parc entier d'un client.
+  La règle exige : fenêtres de maintenance, listes d'exclusion, plafond d'isolations par heure, validation
+  humaine au-delà d'un seuil, autorisation contractuelle. L'isolation par port ou VLAN suppose par ailleurs
+  un NAC déployé.</p>
+
+  <h2>6. Références et sources publiques</h2>
+
+  <div class="chiffre">
+    <div class="tete"><span class="nb">4 319</span>
+      <span class="lg">empreintes de pilotes annotées comme chargées <b>malgré HVCI actif</b></span></div>
+    <p>Référentiel consolidé au <code>14/09/2026</code> :
+    <strong>6 849 empreintes uniques</strong> de pilotes vulnérables. Le décompte porte sur des
+    <strong>empreintes de fichier</strong> (SHA256, SHA1, MD5) — un même pilote peut contribuer jusqu'à
+    trois entrées selon les algorithmes disponibles en amont : le total est donc supérieur au nombre
+    d'échantillons recensés par les sources, qui comptent par pilote.</p>
+    <p style="margin-top:9px">Le sous-ensemble annoté « se charge malgré HVCI » est la
+    <strong>démonstration empirique</strong> de la limite d'HVCI face au BYOVD (§3, axe 2). La
+    correspondance par empreinte est un contrôle de <strong>détection</strong> ; le contrôle
+    <strong>préventif</strong> reste WDAC par signataire — une autre version compilée du même pilote passe
+    au travers de la comparaison d'empreintes.</p>
+  </div>
+
+  <p><strong>Sources de la liste publiée</strong> : LOLDrivers (loldrivers.io) et la transformation lisible
+  par machine de la Microsoft Vulnerable Driver Blocklist. MalwareBazaar est désactivé par défaut dans
+  l'outil de collecte et n'entre pas dans la liste publiée. La colonne <code>sources</code> du CSV conserve
+  la provenance de chaque entrée, ce qui permet de retracer une correspondance contestée. Actualisation
+  prévue : trimestrielle.</p>
+
+  <div class="refs">
+    <div class="src">Sophos X-Ops</div>
+    <ul>
+      <li>« <em>AuKill EDR killer malware abuses Process Explorer driver</em> » (avril 2023) —
+      neutralisation de processus de sécurité via un pilote signé Sysinternals détourné.</li>
+      <li>« <em>Ransomware attackers introduce new EDR killer to their arsenal</em> » (août 2024) —
+      chargeur EDRKillShifter et orchestration dynamique de pilotes vulnérables (groupe RansomHub).</li>
+    </ul>
+
+    <div class="src">Mandiant Threat Intelligence (Google Cloud)</div>
+    <ul>
+      <li>« <em>Bring Your Own Vulnerable Driver (BYOVD) Attacks</em> » — panorama des vecteurs d'attaque
+      au niveau noyau et de l'exploitation des failles de signature tierce.</li>
+    </ul>
+
+    <div class="src">Projet LOLDrivers (<em>Living Off The Land Drivers</em>)</div>
+    <ul>
+      <li><em>loldrivers.io</em> — référentiel public des pilotes signés vulnérables, empreintes hachées
+      et règles de détection ; base du référentiel d'empreintes Agilly.</li>
+    </ul>
+
+    <div class="src">Cadre méthodologique MITRE ATT&amp;CK</div>
+    <ul>
+      <li><em>T1562.001 (Impair Defenses: Disable or Modify Tools)</em> — arrêt forcé et altération
+      logicielle d'agents de protection.</li>
+      <li><em>T1068 (Exploitation for Privilege Escalation)</em> — élévation du mode utilisateur vers le
+      mode noyau.</li>
+      <li><em>T1547.006 (Boot or Logon Autostart Execution: Kernel Modules and Extensions)</em> —
+      chargement d'un pilote en mode noyau.</li>
+    </ul>
+
+    <div class="src">Microsoft Learn — Sécurité Windows</div>
+    <ul>
+      <li>« <em>Microsoft Vulnerable Driver Blocklist</em> » — durcissement et application des listes de
+      révocation de pilotes.</li>
+    </ul>
+  </div>
+
+  <h3>Licence et attribution</h3>
+
+  <p>Le référentiel d'empreintes Agilly est une œuvre dérivée de LOLDrivers (magicsword-io, Apache 2.0) et
+  de la transformation de la blocklist Microsoft publiée par Cyb3r-Monk (MIT). Il est redistribué sous
+  Apache 2.0 ; les attributions figurent dans le fichier <code>NOTICE</code> du dépôt. ATT&amp;CK® est une
+  marque déposée de The MITRE Corporation, qui n'est associée en aucune manière à cet outil.</p>
+
+  <div class="signature">
+    <div>
+      <div class="nom">AGILLY CYBERDÉFENSE</div>
+      <div class="bl">Expertise, Détection &amp; Architecture de Résilience</div>
+    </div>
+    <div class="contact">✉ infos@agilly.net <span class="web">www.agilly.net</span></div>
+  </div>
+
+</div>
+
+<div class="pied">
+  <span>AGILLY Cyberdéfense · Note Technique d'Ingénierie</span>
+  <span>v1.0 — 15 septembre 2026</span>
+</div>
+
+</body>
+</html>
