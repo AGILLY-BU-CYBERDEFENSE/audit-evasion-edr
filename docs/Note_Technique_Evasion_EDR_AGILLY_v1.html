@@ -125,6 +125,11 @@
     body { font-size:10pt; }
     .page { padding:0 14mm 0 14mm; max-width:100%; }
     h2, h3, h4, .axe-titre, .chaine-titre { page-break-after:avoid; }
+    /* Un intertitre d'axe est déjà solidaire de son chapeau, mais le chapeau
+       ne l'était pas du tableau qui le suit : titre et chapeau restaient seuls
+       en bas de page pendant que la matrice basculait sur la suivante.
+       Un paragraphe immédiatement suivi d'un tableau descend donc avec lui. */
+    p:has(+ table) { page-break-after:avoid; break-after:avoid; }
     table, .chaine, .encadre, .hero, .signature, .chiffre { page-break-inside:avoid; }
     tbody tr { page-break-inside:avoid; }
     a { color:inherit; text-decoration:none; }
