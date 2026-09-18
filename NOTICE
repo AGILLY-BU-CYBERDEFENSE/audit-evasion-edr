@@ -1,0 +1,42 @@
+AGILLY Cyberdéfense — Audit du socle Windows face aux vecteurs d'évasion EDR
+Copyright 2026 AGILLY Cyberdéfense
+
+Ce produit inclut des logiciels et des données dérivés des travaux suivants.
+
+-------------------------------------------------------------------------------
+LOLDrivers (Living Off The Land Drivers) — magicsword-io
+https://github.com/magicsword-io/LOLDrivers · https://www.loldrivers.io
+Licence Apache 2.0.
+
+Le fichier AGILLY_LOLDrivers_Empreintes.csv est une oeuvre dérivée du
+référentiel LOLDrivers : empreintes de fichier extraites, normalisées,
+dédupliquées et croisées avec l'annotation « se charge malgré HVCI »
+(bin/hvci_drivers.csv). La colonne « sources » de chaque ligne conserve la
+provenance de l'entrée.
+
+-------------------------------------------------------------------------------
+Microsoft Vulnerable Driver Block Lists — Cyb3r-Monk (Mehmet E.)
+https://github.com/Cyb3r-Monk/Microsoft-Vulnerable-Driver-Block-Lists
+Licence MIT. Copyright (c) 2025 Mehmet E.
+
+Transformation lisible par machine de la Microsoft Vulnerable Driver Blocklist
+(SiPolicy_Enforced.xml). Seule la colonne FileHash (SHA256 de fichier) est
+reprise ; les Authentihash sont écartés, car ils ne correspondent pas à ce que
+Get-FileHash calcule côté audit.
+
+La blocklist elle-même est publiée par Microsoft Corporation et reste soumise
+à ses propres conditions.
+
+-------------------------------------------------------------------------------
+MalwareBazaar — abuse.ch
+https://bazaar.abuse.ch
+Source optionnelle, DÉSACTIVÉE par défaut dans le script de collecte et NON
+utilisée pour produire le CSV publié ici. Son activation requiert une clé API
+personnelle et est soumise aux conditions d'utilisation d'abuse.ch.
+
+-------------------------------------------------------------------------------
+MITRE ATT&CK®
+https://attack.mitre.org
+ATT&CK est une marque déposée de The MITRE Corporation. Les identifiants de
+technique cités par le script servent au rattachement méthodologique des
+contrôles ; MITRE n'est associé en aucune manière à cet outil.
