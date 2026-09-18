@@ -1,5 +1,8 @@
 # Audit du socle Windows face aux vecteurs d'évasion EDR
 
+**Dépôt de référence : <https://github.com/AGILLY-BU-CYBERDEFENSE/audit-evasion-edr>** — seule source de diffusion. Toute copie obtenue
+ailleurs doit être vérifiée contre les empreintes publiées plus bas.
+
 Script PowerShell d'audit **en lecture seule** publié par AGILLY Cyberdéfense. Il mesure le
 durcissement d'un poste Windows au regard des **conditions préalables** qu'exploitent les techniques
 de neutralisation d'agent EDR : privilèges d'administration locale, chargement d'un pilote dans le
@@ -30,6 +33,7 @@ d'ingénierie AGILLY) — lien dans la section [Documentation](#documentation).
 | `.gitattributes` | Interdit à Git toute normalisation des fichiers dont l'empreinte est publiée |
 | `NOTICE` | Attribution des sources amont |
 | `LICENSE` | Apache 2.0 |
+| `docs/` | Note technique d'ingénierie, en PDF et en HTML |
 
 ## Prérequis
 
@@ -70,6 +74,15 @@ Avant exécution, vérifier l'intégrité des fichiers téléchargés :
 Get-FileHash .\Audit-SocleEvasionEDR-v1.ps1 -Algorithm SHA256
 Get-FileHash .\AGILLY_LOLDrivers_Empreintes.csv -Algorithm SHA256   # comparer au .sha256 fourni
 ```
+
+Récupération par clonage, qui préserve l'encodage grâce à `.gitattributes` :
+
+```bash
+git clone https://github.com/AGILLY-BU-CYBERDEFENSE/audit-evasion-edr
+```
+
+Le téléchargement de l'archive ZIP depuis l'interface web est déconseillé pour ces deux fichiers :
+il peut normaliser les fins de ligne et rendre la vérification d'empreinte impossible.
 
 | Fichier | SHA256 |
 |---|---|
@@ -197,8 +210,12 @@ sont comparés séparément, pour qu'aucun module chargé n'échappe au contrôl
 ## Documentation
 
 - Note technique d'ingénierie : *Vecteurs d'Évasion EDR & Architecture de Durcissement* (v1.0) —
-  `<URL À COMPLÉTER AVANT DIFFUSION>`
-- Article de contexte — `<URL À COMPLÉTER AVANT DIFFUSION>`
+  [`docs/Note_Technique_Evasion_EDR_AGILLY_v1.pdf`](docs/Note_Technique_Evasion_EDR_AGILLY_v1.pdf)
+  ([version HTML](docs/Note_Technique_Evasion_EDR_AGILLY_v1.html))
+- Article de contexte — `<URL À COMPLÉTER APRÈS PUBLICATION>`
+
+> Le lien de l'article reste ouvert tant que la publication n'a pas eu lieu. Il est le dernier
+> élément à renseigner : le renseigner d'avance reviendrait à publier un lien mort.
 
 ## Licence
 
