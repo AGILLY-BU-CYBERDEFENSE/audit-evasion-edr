@@ -3,7 +3,7 @@
 #  Audit du socle Windows face aux vecteurs d'évasion EDR
 #  Version 1.0
 # ---------------------------------------------------------------------------
-#  PORTÉE DE CE CONTRÔLE — À LIRE AVANT INTERPRÉTATION
+#  PORTÉE DE CE CONTRÔLE, À LIRE AVANT INTERPRÉTATION
 #
 #  Les techniques de neutralisation d'agent reposent toutes sur des
 #  conditions préalables : des privilèges d'administration locale, la
@@ -23,7 +23,7 @@
 #
 #  HYPOTHÈSE DE VALIDITÉ : ce constat suppose que le système d'exploitation
 #  n'est pas déjà compromis. Chaque contrôle lit l'état de la machine par les
-#  interfaces que Windows lui-même expose — registre, WMI, gestionnaire de
+#  interfaces que Windows lui-même expose, registre, WMI, gestionnaire de
 #  services, journaux d'événements, variables de firmware relayées par le
 #  noyau. Autrement dit, c'est le système audité qui rend son propre verdict.
 #  Cela vaut A FORTIORI pour les contrôles d'intégrité noyau : l'état de HVCI,
@@ -118,7 +118,7 @@ $LolDriversPath = ''
 # Laissée vide, elle est reprise automatiquement du fichier « .sha256 »
 # adjacent à la liste, s'il existe (format sha256sum ou empreinte nue).
 # PORTÉE DE CETTE VÉRIFICATION : elle atteste que la liste n'a pas été
-# tronquée ni corrompue au transport. Elle n'atteste PAS son authenticité —
+# tronquée ni corrompue au transport. Elle n'atteste PAS son authenticité, 
 # qui remplace le CSV remplace aussi le .sha256 posé à côté. Pour une
 # vérification d'authenticité, renseigner ici en dur l'empreinte publiée sur
 # le dépôt, ou passer AGILLY_LOLSHA256 depuis l'outil de déploiement.
@@ -247,7 +247,7 @@ $MITRE['Rotation du mot de passe administrateur local (LAPS)'] = 'T1078.003'
 $MITRE['Contrôle de compte d''utilisateur (UAC)']              = 'T1548.002'
 # Réduction de surface
 $MITRE['Posture ASR globale']                                  = 'T1562.001'
-$MITRE['ASR — exécutables peu répandus (prévalence)']          = 'T1204.002'
+$MITRE['ASR, exécutables peu répandus (prévalence)']          = 'T1204.002'
 
 $VERSION_SCRIPT = '1.0'
 
@@ -606,7 +606,7 @@ if (-not $osSupporte) {
 
 
 # ===========================================================================
-#  AXE 1 — SOCLE FIRMWARE ET INTÉGRITÉ NOYAU
+#  AXE 1, SOCLE FIRMWARE ET INTÉGRITÉ NOYAU
 # ===========================================================================
 
 Write-Host '[1/7] Socle firmware et intégrité noyau...' -ForegroundColor DarkCyan
@@ -801,7 +801,7 @@ else {
 # --- Protection LSA ---
 # La valeur de registre ne prend effet qu'au démarrage suivant. Lire la clé
 # seule produirait un faux CONFORME sur une machine fraîchement configurée
-# et non redémarrée — état qu'un attaquant peut d'ailleurs fabriquer.
+# et non redémarrée, état qu'un attaquant peut d'ailleurs fabriquer.
 # Windows journalise l'activation réelle : Wininit, événement 12 dans le
 # journal Système, à chaque démarrage où LSASS est lancé en processus protégé.
 $lsaPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa'
@@ -858,7 +858,7 @@ elseif ($pplActifPreuve) {
     else {
         $niveau = 'active par défaut sur ce build, sans valeur de registre explicite'
     }
-    Add-Finding 'Intégrité noyau' 'Protection LSA (RunAsPPL)' $ST_OK $CR_ELEV ('LSASS exécuté en processus protégé — ' + $niveau + '. Activation confirmée par le journal de démarrage.') 'La preuve d''activation est l''événement Wininit 12, pas la valeur de registre. Selon la documentation Microsoft, RunAsPPL=1 correspond au verrou UEFI et 2 à son absence ; à défaut de verrou, la configuration reste modifiable par un administrateur local. RunAsPPL reste par ailleurs contournable par un pilote vulnérable signé : à coupler avec HVCI et Credential Guard.'
+    Add-Finding 'Intégrité noyau' 'Protection LSA (RunAsPPL)' $ST_OK $CR_ELEV ('LSASS exécuté en processus protégé, ' + $niveau + '. Activation confirmée par le journal de démarrage.') 'La preuve d''activation est l''événement Wininit 12, pas la valeur de registre. Selon la documentation Microsoft, RunAsPPL=1 correspond au verrou UEFI et 2 à son absence ; à défaut de verrou, la configuration reste modifiable par un administrateur local. RunAsPPL reste par ailleurs contournable par un pilote vulnérable signé : à coupler avec HVCI et Credential Guard.'
 }
 elseif ($pplConfigure -and $pplPreuveLisible -and $journalRemonteAuBoot) {
     Add-Finding 'Intégrité noyau' 'Protection LSA (RunAsPPL)' $ST_CONF $CR_ELEV 'Valeur de registre positionnée, mais aucun événement Wininit 12 depuis le dernier démarrage alors que le journal remonte jusqu''à celui-ci : la protection n''est pas active en mémoire.' 'Redémarrer la machine pour appliquer la configuration, puis relancer l''audit. Tant que le redémarrage n''a pas eu lieu, LSASS n''est pas protégé.'
@@ -879,7 +879,7 @@ else {
 
 
 # ===========================================================================
-#  AXE 2 — ANTI-BYOVD
+#  AXE 2, ANTI-BYOVD
 # ===========================================================================
 
 Write-Host '[2/7] Contrôles anti-BYOVD...' -ForegroundColor DarkCyan
@@ -914,7 +914,7 @@ else {
 
 
 # ===========================================================================
-#  AXE 3 — AGENTS DE SÉCURITÉ PRÉSENTS ET INTÉGRITÉ
+#  AXE 3, AGENTS DE SÉCURITÉ PRÉSENTS ET INTÉGRITÉ
 # ===========================================================================
 
 Write-Host '[3/7] Détection des agents de sécurité...' -ForegroundColor DarkCyan
@@ -1002,7 +1002,7 @@ $collecteursDetectes = @($collecteursDetectes | Select-Object -Unique)
 
 # Defender Antivirus est présent sur tout Windows : sa détection ne dit rien du
 # dispositif en place. Ce qui change la lecture de la moitié des contrôles, c'est
-# la présence d'un agent TIERS en protection primaire — auquel cas les services,
+# la présence d'un agent TIERS en protection primaire, auquel cas les services,
 # l'anti-sabotage et les signatures de Defender deviennent hors sujet, et c'est
 # la console de l'éditeur qui fait foi.
 $agentsTiers = @($agentsDetectes | Where-Object { $_ -ne 'Microsoft Defender' })
@@ -1035,7 +1035,7 @@ else {
     $detAgents += ' Détail : ' + (($servicesSecurite | ForEach-Object {
         $ch = [string] $_.PathName
         if ($ch.Length -gt 80) { $ch = $ch.Substring(0, 77) + '...' }
-        $_.Name + ' [' + $_.DisplayName + '] — ' + $_.State + ' / ' + $_.StartMode + ' / ' + $ch
+        $_.Name + ' [' + $_.DisplayName + '], ' + $_.State + ' / ' + $_.StartMode + ' / ' + $ch
     }) -join ' | ') + '.'
     Add-Finding 'Intégrité de l''agent' 'Agents de sécurité détectés' $ST_INFO $CR_INFO $detAgents 'Vérifier que l''agent identifié correspond bien à la solution contractuelle du client, et que les chemins listés pointent vers les binaires attendus de l''éditeur.'
 }
@@ -1236,7 +1236,7 @@ else {
                 Add-Finding 'Télémétrie' 'Exclusions antivirus' $ST_OK $CR_ELEV 'Aucune exclusion définie.' 'Aucune action.'
             }
             elseif ($alertes.Count -gt 0) {
-                Add-Finding 'Télémétrie' 'Exclusions antivirus' $ST_KO $CR_ELEV ($total.ToString() + ' exclusion(s) dont des entrées à risque — ' + ($alertes -join ' ; ') + '.') 'Une exclusion de racine, de répertoire utilisateur, d''extension exécutable ou d''interpréteur neutralise la protection sur un périmètre entier et sert directement l''évasion. Revoir et justifier chaque entrée ; l''ajout d''exclusions est une technique d''attaque documentée.'
+                Add-Finding 'Télémétrie' 'Exclusions antivirus' $ST_KO $CR_ELEV ($total.ToString() + ' exclusion(s) dont des entrées à risque, ' + ($alertes -join ' ; ') + '.') 'Une exclusion de racine, de répertoire utilisateur, d''extension exécutable ou d''interpréteur neutralise la protection sur un périmètre entier et sert directement l''évasion. Revoir et justifier chaque entrée ; l''ajout d''exclusions est une technique d''attaque documentée.'
             }
             else {
                 Add-Finding 'Télémétrie' 'Exclusions antivirus' $ST_INFO $CR_INFO ($total.ToString() + ' exclusion(s) définie(s) : ' + $exPath.Count + ' chemin(s), ' + $exProc.Count + ' processus, ' + $exExt.Count + ' extension(s). Aucune à portée manifestement large.') 'Revoir la justification métier de chaque exclusion et vérifier qu''aucune n''a été ajoutée hors processus de changement.'
@@ -1331,13 +1331,13 @@ else {
         $actP = -1
         if ($jP -ge 0) { $actP = [int] $act[$jP] }
         if ($actP -eq 1) {
-            Add-Finding 'Réduction de surface' 'ASR — exécutables peu répandus (prévalence)' $ST_OK $CR_FAIB 'Règle de prévalence en mode Bloc.' 'Efficace contre les rançongiciels récents. Surveiller les faux positifs sur les outils internes et logiciels métier peu diffusés, et maintenir une liste d''exceptions à jour.'
+            Add-Finding 'Réduction de surface' 'ASR, exécutables peu répandus (prévalence)' $ST_OK $CR_FAIB 'Règle de prévalence en mode Bloc.' 'Efficace contre les rançongiciels récents. Surveiller les faux positifs sur les outils internes et logiciels métier peu diffusés, et maintenir une liste d''exceptions à jour.'
         }
         elseif ($actP -eq 2 -or $actP -eq 6) {
-            Add-Finding 'Réduction de surface' 'ASR — exécutables peu répandus (prévalence)' $ST_INFO $CR_INFO 'Règle de prévalence en mode Audit/Avertissement.' 'Bon compromis initial. Cette règle bloque par construction tout exécutable peu répandu ou récent : mesurer longuement l''impact (outils internes, métier) avant toute bascule en Bloc.'
+            Add-Finding 'Réduction de surface' 'ASR, exécutables peu répandus (prévalence)' $ST_INFO $CR_INFO 'Règle de prévalence en mode Audit/Avertissement.' 'Bon compromis initial. Cette règle bloque par construction tout exécutable peu répandu ou récent : mesurer longuement l''impact (outils internes, métier) avant toute bascule en Bloc.'
         }
         else {
-            Add-Finding 'Réduction de surface' 'ASR — exécutables peu répandus (prévalence)' $ST_INFO $CR_INFO 'Règle de prévalence non activée.' 'À envisager contre les rançongiciels récents, mais son taux de faux positifs est plus élevé que les autres règles clés : la déployer d''abord en Audit sur une période prolongée, constituer la liste d''exceptions, puis décider. Son absence n''est pas en soi une non-conformité.'
+            Add-Finding 'Réduction de surface' 'ASR, exécutables peu répandus (prévalence)' $ST_INFO $CR_INFO 'Règle de prévalence non activée.' 'À envisager contre les rançongiciels récents, mais son taux de faux positifs est plus élevé que les autres règles clés : la déployer d''abord en Audit sur une période prolongée, constituer la liste d''exceptions, puis décider. Son absence n''est pas en soi une non-conformité.'
         }
     }
     catch {
@@ -1348,7 +1348,7 @@ else {
 
 
 # ===========================================================================
-#  AXE 4 — TÉLÉMÉTRIE ET SUPERVISION
+#  AXE 4, TÉLÉMÉTRIE ET SUPERVISION
 # ===========================================================================
 
 Write-Host '[4/7] Télémétrie et supervision...' -ForegroundColor DarkCyan
@@ -1369,7 +1369,7 @@ elseif ($onb.Found -and [int] $onb.Value -eq 1) {
         # Vérifiable localement : intégration + service de télémétrie actif.
         Add-Finding 'Télémétrie' 'Rattachement à une console (MDE)' $ST_OK $CR_CRIT ('Machine intégrée à Defender for Endpoint (' + $etatSense + ').') 'Intégration et service de télémétrie confirmés sur la machine.'
         # NON vérifiable localement : la console reçoit-elle réellement ? Même
-        # question que pour un agent tiers — donc même état, par symétrie.
+        # question que pour un agent tiers, donc même état, par symétrie.
         Add-Finding 'Télémétrie' 'Remontée effective vers la console (MDE)' $ST_CONSOLE $CR_CRIT 'L''intégration et le service Sense sont actifs localement, mais la réception effective côté console ne se vérifie pas depuis la machine.' 'Confirmer dans le portail Defender que cette machine est « active » et a communiqué récemment, et que son seuil d''inactivité déclenche une alerte.'
     }
     else {
@@ -1379,8 +1379,8 @@ elseif ($onb.Found -and [int] $onb.Value -eq 1) {
 else {
     # Defender Antivirus est présent sur TOUT Windows : sa seule présence ne
     # dit rien du dispositif de supervision en place. Avant de conclure à une
-    # machine non supervisée, il faut écarter le cas — majoritaire en parc
-    # client — d'un agent tiers en protection primaire, qui remonte vers sa
+    # machine non supervisée, il faut écarter le cas, majoritaire en parc
+    # client, d'un agent tiers en protection primaire, qui remonte vers sa
     # propre console et rend le rattachement MDE hors sujet.
     $agentsTiers = @($agentsDetectes | Where-Object { $_ -ne 'Microsoft Defender' })
 
@@ -1403,7 +1403,7 @@ if ($jSbl.Actif) {
     Add-Finding 'Télémétrie' 'Journalisation ScriptBlock PowerShell' $ST_OK $CR_ELEV ('Journalisation des blocs de script active (' + $jSbl.Source + ').') 'Aucune action.'
 }
 else {
-    Add-Finding 'Télémétrie' 'Journalisation ScriptBlock PowerShell' $ST_KO $CR_ELEV 'Journalisation des blocs de script inactive, ni par stratégie de groupe ni en configuration locale.' 'Filet de sécurité utile face au masquage AMSI/ETW : la journalisation ScriptBlock capture le code désobfusqué avant exécution. Elle n''est toutefois pas infaillible — un administrateur peut neutraliser les fournisseurs ETW en mémoire (correctif d''EtwEventWrite) sans toucher au registre. Activer de préférence par stratégie de groupe, pour que le réglage ne soit pas modifiable localement.'
+    Add-Finding 'Télémétrie' 'Journalisation ScriptBlock PowerShell' $ST_KO $CR_ELEV 'Journalisation des blocs de script inactive, ni par stratégie de groupe ni en configuration locale.' 'Filet de sécurité utile face au masquage AMSI/ETW : la journalisation ScriptBlock capture le code désobfusqué avant exécution. Elle n''est toutefois pas infaillible, un administrateur peut neutraliser les fournisseurs ETW en mémoire (correctif d''EtwEventWrite) sans toucher au registre. Activer de préférence par stratégie de groupe, pour que le réglage ne soit pas modifiable localement.'
 }
 
 $jMod = Test-JournalisationPS -SousCle 'ModuleLogging' -Valeur 'EnableModuleLogging'
@@ -1482,7 +1482,7 @@ catch {
 
 
 # ===========================================================================
-#  AXE 5 — HISTORIQUE DES JOURNAUX (30 JOURS)
+#  AXE 5, HISTORIQUE DES JOURNAUX (30 JOURS)
 #  Les autres axes photographient un état à l'instant T. Une machine dont
 #  l'agent a été arrêté quatre heures la semaine passée puis redémarré y
 #  ressortirait intégralement conforme. Cet axe cherche la trace.
@@ -1500,7 +1500,7 @@ $depuis30 = (Get-Date).AddDays(-30)
 # propre au service Eventlog : d'autres fournisseurs écrivent un événement 104
 # dans le journal Système. Un filtre portant sur le seul identifiant compte ces
 # événements étrangers et fabrique un effacement de journal qui n'a jamais eu
-# lieu — constat de criticité maximale rendu sur une machine saine.
+# lieu, constat de criticité maximale rendu sur une machine saine.
 $journauxEffaces = $false
 $evClrSys = Get-Evenements -Journal 'System'   -Ids @(104)  -Depuis $depuis30 -Fournisseur 'Microsoft-Windows-Eventlog' -Max 50
 $evClrSec = Get-Evenements -Journal 'Security' -Ids @(1102) -Depuis $depuis30 -Fournisseur 'Microsoft-Windows-Eventlog' -Max 50
@@ -1517,7 +1517,7 @@ elseif ($evClrSec.Evenements.Count -gt 0) { $clrDetail += 'journal Sécurité ef
 if ($journauxEffaces) {
     $detClr = 'Effacement de journal relevé : ' + ($clrDetail -join ' ; ') + '. Les constats d''historique ci-dessous ne sont pas probants.'
     if ($clrIllisible.Count -gt 0) { $detClr += ' Journal(aux) non lisible(s) dans cette session : ' + ($clrIllisible -join ', ') + '.' }
-    Add-Finding 'Historique' 'Intégrité des journaux (effacement, 30 j)' $ST_TRI $CR_INFO $detClr 'Événement 104 du fournisseur Eventlog (journal effacé) ou 1102 (journal Sécurité effacé). Identifier l''auteur et la date dans l''événement lui-même, puis rapprocher d''une opération déclarée — réinitialisation de poste, intervention de maintenance, remise en service. Sans justification, traiter comme un incident d''anti-investigation.'
+    Add-Finding 'Historique' 'Intégrité des journaux (effacement, 30 j)' $ST_TRI $CR_INFO $detClr 'Événement 104 du fournisseur Eventlog (journal effacé) ou 1102 (journal Sécurité effacé). Identifier l''auteur et la date dans l''événement lui-même, puis rapprocher d''une opération déclarée, réinitialisation de poste, intervention de maintenance, remise en service. Sans justification, traiter comme un incident d''anti-investigation.'
 }
 elseif ($clrIllisible.Count -gt 0) {
     Add-Finding 'Historique' 'Intégrité des journaux (effacement, 30 j)' $ST_UNK $CR_INFO ('Journal(aux) non lisible(s) dans cette session : ' + ($clrIllisible -join ', ') + '. L''absence d''effacement ne peut pas être établie.') 'Relancer en session administrateur.'
@@ -1596,7 +1596,7 @@ if ($servicesSecurite.Count -gt 0) {
             }
             # Regarder le seul service de tête ne suffit pas : deux agents
             # bavards se partageant 80 % du volume donnent un premier à 56 %,
-            # donc « pas de service dominant » — et le constat désignerait comme
+            # donc « pas de service dominant », et le constat désignerait comme
             # diversité ce qui est du bruit de deux produits. On mesure donc
             # aussi le peloton de tête.
             $partTeteDeux = 0
@@ -1605,16 +1605,16 @@ if ($servicesSecurite.Count -gt 0) {
             }
             $detConcentration = ''
             if ($partDominante -ge 70) {
-                $detConcentration = ' Concentration : ' + $partDominante + ' % des événements portent sur « ' + $nomDominant + ' » — profil d''instabilité ou de cycle de mise à jour d''un seul produit, et non de neutralisation coordonnée.'
+                $detConcentration = ' Concentration : ' + $partDominante + ' % des événements portent sur « ' + $nomDominant + ' », profil d''instabilité ou de cycle de mise à jour d''un seul produit, et non de neutralisation coordonnée.'
             }
             elseif ($partTeteDeux -ge 80) {
-                $detConcentration = ' Concentration : ' + $partTeteDeux + ' % des événements portent sur deux services (« ' + $classe[0].Key + ' » et « ' + $classe[1].Key + ' ») — profil d''instabilité ou de cycle de mise à jour de ces produits, et non de neutralisation coordonnée.'
+                $detConcentration = ' Concentration : ' + $partTeteDeux + ' % des événements portent sur deux services (« ' + $classe[0].Key + ' » et « ' + $classe[1].Key + ' »), profil d''instabilité ou de cycle de mise à jour de ces produits, et non de neutralisation coordonnée.'
             }
             elseif ($classe.Count -ge 3) {
                 $detConcentration = ' Répartition étalée sur ' + $classe.Count + ' service(s) distinct(s), sans produit dominant (tête de classement : ' + $partTeteDeux + ' % sur deux services) : c''est le profil qui justifie une lecture chronologique en priorité.'
             }
 
-            Add-Finding 'Historique' 'Arrêts de services de sécurité (30 j)' $ST_TRI $CR_INFO ($pertinents.Count.ToString() + ' événement(s) d''arrêt, de plantage ou de reconfiguration.' + $detRepartition + $detConcentration + $libRecents + $resume + '.' + $detPlant + $noteTronq) 'Lire d''abord la concentration, ensuite la chronologie. Rapprocher chaque occurrence d''une fenêtre de maintenance déclarée : un arrêt hors fenêtre est un incident, un arrêt dans la fenêtre ne l''est pas — distinction que ce script ne peut pas faire, d''où le statut À TRIER. Rappel : une terminaison depuis le noyau ne passe pas par le gestionnaire de services et ne génère aucun de ces événements, l''absence de trace ne prouve donc rien.'
+            Add-Finding 'Historique' 'Arrêts de services de sécurité (30 j)' $ST_TRI $CR_INFO ($pertinents.Count.ToString() + ' événement(s) d''arrêt, de plantage ou de reconfiguration.' + $detRepartition + $detConcentration + $libRecents + $resume + '.' + $detPlant + $noteTronq) 'Lire d''abord la concentration, ensuite la chronologie. Rapprocher chaque occurrence d''une fenêtre de maintenance déclarée : un arrêt hors fenêtre est un incident, un arrêt dans la fenêtre ne l''est pas, distinction que ce script ne peut pas faire, d''où le statut À TRIER. Rappel : une terminaison depuis le noyau ne passe pas par le gestionnaire de services et ne génère aucun de ces événements, l''absence de trace ne prouve donc rien.'
         }
     }
 }
@@ -1665,7 +1665,7 @@ else {
     # Les composants Windows signés Microsoft sont refusés en boucle par la
     # politique d'intégrité par défaut : svchost.exe à lui seul représente
     # couramment l'essentiel du volume. Les compter dans le constat principal
-    # noie le seul cas qui intéresse ici — un pilote tiers inconnu refusé une
+    # noie le seul cas qui intéresse ici, un pilote tiers inconnu refusé une
     # fois. Ils sont donc restitués à part, jamais supprimés.
     $binSysteme = '^(svchost|services|lsass|wininit|csrss|smss|winlogon|spoolsv|dllhost|taskhostw|sihclient|securityhealthservice|msmpeng|mpdefendercoreservice|searchindexer|runtimebroker|wudfhost|dwm|explorer|conhost|backgroundtaskhost|sppsvc|trustedinstaller|tiworker)\.exe$'
     $binHorsSysteme = @{}
@@ -1726,7 +1726,7 @@ else {
 # indépendant est un prérequis d'architecture de la détection de silence.
 # Principe du script : une clé présente ne prouve pas une collecte active.
 # On lit donc les valeurs sous SubscriptionManager (une URL de serveur y est
-# attendue), et on distingue Sysmon — qui journalise localement — d'un vrai
+# attendue), et on distingue Sysmon, qui journalise localement, d'un vrai
 # transfert hors machine.
 $wefPath = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\EventLog\EventForwarding\SubscriptionManager'
 $wefConfigure = $false
@@ -1757,7 +1757,7 @@ elseif ($wefCle -or $sysmonActif) {
 }
 else {
     if ($horsDomaine) {
-        Add-Finding 'Historique' 'Collecteur indépendant de l''agent' $ST_NA $CR_ELEV ('Aucun transfert d''événements ni collecteur tiers détecté, sur une machine hors domaine (' + $domaine + ').') 'Contrôle sans objet sur un poste isolé : la collecte WEF suppose une infrastructure de collecte. La limite demeure — si l''agent est neutralisé, la preuve reste sur la machine — et le contrôle redevient pleinement applicable dès l''intégration à un parc supervisé.'
+        Add-Finding 'Historique' 'Collecteur indépendant de l''agent' $ST_NA $CR_ELEV ('Aucun transfert d''événements ni collecteur tiers détecté, sur une machine hors domaine (' + $domaine + ').') 'Contrôle sans objet sur un poste isolé : la collecte WEF suppose une infrastructure de collecte. La limite demeure, si l''agent est neutralisé, la preuve reste sur la machine, et le contrôle redevient pleinement applicable dès l''intégration à un parc supervisé.'
     }
     else {
         Add-Finding 'Historique' 'Collecteur indépendant de l''agent' $ST_KO $CR_ELEV 'Aucun transfert d''événements ni collecteur tiers détecté.' 'Sans collecteur indépendant, les journaux de cette machine ne quittent le poste que par l''agent lui-même. Si l''agent est neutralisé, la preuve de sa neutralisation reste sur la machine compromise. Déployer un abonnement WEF vers un collecteur, ou Sysmon avec transfert.'
@@ -1766,7 +1766,7 @@ else {
 
 
 # ===========================================================================
-#  AXE 6 — PRIVILÈGES
+#  AXE 6, PRIVILÈGES
 # ===========================================================================
 
 Write-Host '[6/7] Privilèges et comptes...' -ForegroundColor DarkCyan
@@ -1812,7 +1812,7 @@ elseif ($lapsLegacy.Found -and [int] $lapsLegacy.Value -eq 1) {
 }
 else {
     if ($horsDomaine) {
-        Add-Finding 'Privilèges' 'Rotation du mot de passe administrateur local (LAPS)' $ST_NA $CR_ELEV ('Aucune solution de rotation détectée, sur une machine hors domaine (' + $domaine + ').') 'Contrôle sans objet sur un poste isolé : LAPS suppose un annuaire de sauvegarde (Active Directory ou Entra ID). À réévaluer dès que la machine rejoint un parc géré — c''est là que le mot de passe administrateur local partagé devient le vecteur de déplacement latéral.'
+        Add-Finding 'Privilèges' 'Rotation du mot de passe administrateur local (LAPS)' $ST_NA $CR_ELEV ('Aucune solution de rotation détectée, sur une machine hors domaine (' + $domaine + ').') 'Contrôle sans objet sur un poste isolé : LAPS suppose un annuaire de sauvegarde (Active Directory ou Entra ID). À réévaluer dès que la machine rejoint un parc géré, c''est là que le mot de passe administrateur local partagé devient le vecteur de déplacement latéral.'
     }
     else {
         Add-Finding 'Privilèges' 'Rotation du mot de passe administrateur local (LAPS)' $ST_KO $CR_ELEV 'Aucune solution de rotation détectée.' 'Un mot de passe administrateur local identique sur le parc permet le déplacement latéral immédiat après compromission d''un seul poste.'
@@ -1839,7 +1839,7 @@ else {
 
 
 # ===========================================================================
-#  AXE 7 — INVENTAIRE DES PILOTES NOYAU TIERS
+#  AXE 7, INVENTAIRE DES PILOTES NOYAU TIERS
 # ===========================================================================
 
 if ($ScanDrivers -and $processus32SurOs64) {
@@ -1947,7 +1947,7 @@ elseif ($ScanDrivers) {
                         $annot = ''
                         if ($l.pilote) { $annot = $l.pilote }
                         if ($l.hvci -eq 'CHARGE_MALGRE_HVCI') {
-                            if ($annot -ne '') { $annot += ' — ' }
+                            if ($annot -ne '') { $annot += ', ' }
                             $annot += 'se charge malgré HVCI'
                         }
                         $lolIndex[$h] = $annot
@@ -2036,19 +2036,19 @@ elseif ($ScanDrivers) {
             }
             catch { }
 
-            # Un pilote n'est réputé Microsoft — et donc écarté de l'analyse —
+            # Un pilote n'est réputé Microsoft, et donc écarté de l'analyse, 
             # que si sa signature est VALIDE. Le Subject du certificat est
             # déclaratif : un pilote auto-signé ou à signature invalide peut y
             # inscrire « O=Microsoft Corporation ». Sans la garde sur le statut,
             # un tel pilote sortirait de l'analyse AVANT les contrôles de
-            # signature et de correspondance LOLDrivers — exactement la ruse
+            # signature et de correspondance LOLDrivers, exactement la ruse
             # que cet axe anti-BYOVD est censé attraper.
             #
             # Un pilote TIERS signé WHQL ou par attestation porte le sujet
             # « CN=Microsoft Windows Hardware Compatibility Publisher,
             #   O=Microsoft Corporation » : Microsoft le contresigne, il ne
             # l'édite pas. L'écarter retirerait de l'analyse la classe exacte
-            # que le BYOVD exploite — signée, valide, acceptée par le DSE. Sur
+            # que le BYOVD exploite, signée, valide, acceptée par le DSE. Sur
             # un poste de test, 33 pilotes en exécution étaient dans ce cas et
             # l'inventaire n'en rapportait qu'un seul. Seul le signataire de
             # l'éditeur du système est donc écarté.
@@ -2181,7 +2181,7 @@ if ($ScanDrivers) {
             }
 
             if ($minifiltresNoms.Count -gt 0) {
-                Add-Finding 'Anti-BYOVD' 'Inventaire des minifiltres (Filter Manager)' $ST_INFO $CR_INFO ($minifiltresNoms.Count.ToString() + ' minifiltre(s) chargé(s) : ' + ($minifiltresAff -join ', ') + '.') 'Confirmer que le minifiltre de l''agent de sécurité figure dans la liste. Rappel : « fltmc unload » peut décharger un minifiltre sans arrêt de service et sans événement 7036/7040 — surveiller les déchargements côté agent. Un déchargement inattendu du minifiltre EDR est un signal d''évasion.'
+                Add-Finding 'Anti-BYOVD' 'Inventaire des minifiltres (Filter Manager)' $ST_INFO $CR_INFO ($minifiltresNoms.Count.ToString() + ' minifiltre(s) chargé(s) : ' + ($minifiltresAff -join ', ') + '.') 'Confirmer que le minifiltre de l''agent de sécurité figure dans la liste. Rappel : « fltmc unload » peut décharger un minifiltre sans arrêt de service et sans événement 7036/7040, surveiller les déchargements côté agent. Un déchargement inattendu du minifiltre EDR est un signal d''évasion.'
             }
             else {
                 Add-Finding 'Anti-BYOVD' 'Inventaire des minifiltres (Filter Manager)' $ST_UNK $CR_INFO 'Aucun minifiltre lisible via fltmc, ou sortie non exploitable.' 'Vérifier manuellement avec « fltmc filters ». Une absence totale de minifiltre sur un poste doté d''un EDR moderne est anormale.'
@@ -2237,7 +2237,7 @@ if ($ScanDrivers) {
             }
             else {
                 # Même exigence : liste d'empreintes absente, processus 32 bits
-                # ou aucun minifiltre lu — le contrôle sort INDÉTERMINÉ, il ne
+                # ou aucun minifiltre lu, le contrôle sort INDÉTERMINÉ, il ne
                 # disparaît pas du rapport.
                 $motifMf = 'conditions d''exécution insuffisantes'
                 if ($processus32SurOs64) { $motifMf = 'processus 32 bits sur OS 64 bits : la résolution des chemins de pilotes n''est pas fiable' }
@@ -2417,7 +2417,7 @@ if ($ExportPath -ne '') {
 
 
 # ===========================================================================
-#  RAPPORT HTML — CHARTE AGILLY
+#  RAPPORT HTML, CHARTE AGILLY
 # ===========================================================================
 
 if ($HtmlReportPath -ne '') {
@@ -2454,7 +2454,7 @@ if ($HtmlReportPath -ne '') {
                     $bloc += '<div class="rec"><strong>Recommandation.</strong> ' + (Protect-Html $f.Recommandation) + '</div>'
                 }
                 $sousTitre = Protect-Html $f.Axe
-                if ($f.Technique -ne '') { $sousTitre += ' &middot; ATT&amp;CK ' + (Protect-Html $f.Technique) }
+                if ($f.Technique -ne '') { $sousTitre += ' | ATT&amp;CK ' + (Protect-Html $f.Technique) }
                 $lignesConstats += '<tr><td><span class="badge ' + $cls + '">' + (Protect-Html $f.Etat) + '</span></td><td class="ctrl">' + (Protect-Html $f.Controle) + '<div class="axe">' + $sousTitre + '</div></td><td>' + $bloc + '</td></tr>'
             }
             $lignesConstats += '</table>'
@@ -2539,7 +2539,7 @@ if ($HtmlReportPath -ne '') {
 <body>
 <header>
   <div class="marque">agil<span>ly</span> &nbsp;Cyberdéfense</div>
-  <div class="titre">Audit du socle Windows face aux vecteurs d'évasion EDR &mdash; version $VERSION_SCRIPT</div>
+  <div class="titre">Audit du socle Windows face aux vecteurs d'évasion EDR, version $VERSION_SCRIPT</div>
 </header>
 <main>
 
@@ -2555,7 +2555,7 @@ if ($HtmlReportPath -ne '') {
     </table>
     <p style="margin:14px 0 0 0;font-size:12px;color:#666;">
       <strong>Portée.</strong> Un socle conforme ne garantit pas qu'un agent résisterait à une attaque
-      ciblée — la résistance effective relève d'un test contrôlé, distinct de cet audit. Chaque contrôle
+      ciblée, la résistance effective relève d'un test contrôlé, distinct de cet audit. Chaque contrôle
       lit l'état de la machine par les interfaces que Windows lui-même expose : les verdicts sont valides
       sous hypothèse d'un système non compromis. Cela vaut aussi pour les contrôles d'intégrité noyau,
       dont l'état est rapporté à travers le noyau qu'ils décrivent.
@@ -2570,7 +2570,7 @@ if ($HtmlReportPath -ne '') {
   <div class="carte">
     <h2>Score de durcissement</h2>
     <div class="score">
-      <div><div class="val">$score</div><div class="lbl">sur 100 &mdash; $maturite$(if ($scorePlafonne) { ' &mdash; score plafonné' })</div></div>
+      <div><div class="val">$score</div><div class="lbl">sur 100, $maturite$(if ($scorePlafonne) { ', score plafonné' })</div></div>
       <div class="jauge"><div></div></div>
     </div>
     <div class="chiffres">
@@ -2583,7 +2583,7 @@ if ($HtmlReportPath -ne '') {
       <div><span>$nbTri</span><small>À trier (historique)</small></div>
       <div><span>$couverture&nbsp;%</span><small>Couverture d'audit</small></div>
     </div>
-    $(if ($nbTri -gt 0) { '<p style="margin:14px 0 0 0;font-size:12px;color:#00695C;"><strong>' + $nbTri + ' signal(aux) d''historique à trier.</strong> Ces constats relèvent d''événements journalisés, dont l''interprétation exige une corrélation avec les fenêtres de maintenance et le cycle de mise à jour des agents — informations dont l''audit ne dispose pas. Ils ne pèsent ni sur le score ni sur la couverture, et doivent être lus séparément.</p>' })
+    $(if ($nbTri -gt 0) { '<p style="margin:14px 0 0 0;font-size:12px;color:#00695C;"><strong>' + $nbTri + ' signal(aux) d''historique à trier.</strong> Ces constats relèvent d''événements journalisés, dont l''interprétation exige une corrélation avec les fenêtres de maintenance et le cycle de mise à jour des agents, informations dont l''audit ne dispose pas. Ils ne pèsent ni sur le score ni sur la couverture, et doivent être lus séparément.</p>' })
     $(if ($scorePlafonne) { '<p style="margin:14px 0 0 0;font-size:12px;color:#C0392B;"><strong>Score plafonné à 49.</strong> Au moins un écart de criticité critique a été relevé : aucune machine portant un tel écart ne peut être présentée comme satisfaisante, quel que soit le nombre de contrôles conformes par ailleurs.</p>' })
     $(if ($auditNonConcluant) { '<p style="margin:14px 0 0 0;font-size:12px;color:#6C3FA0;"><strong>Audit non concluant.</strong> Les conditions d''exécution (session non élevée, processus 32 bits, ou couverture insuffisante) ne permettent pas de conclure : l''absence d''écart relevé ne vaut pas conformité. Relancer dans de bonnes conditions avant toute restitution.</p>' })
   </div>
@@ -2600,9 +2600,9 @@ if ($HtmlReportPath -ne '') {
 
 </main>
 <footer>
-  AGILLY Cyberdéfense &mdash; Expertise, Détection &amp; Architecture de Résilience &mdash; infos@agilly.net &mdash; www.agilly.net<br />
+  AGILLY Cyberdéfense, Expertise, Détection &amp; Architecture de Résilience, infos@agilly.net, www.agilly.net<br />
   Rapport généré le $(Protect-Html $contexte.DateAudit) par le script d'audit version $VERSION_SCRIPT, en lecture seule et sans transmission réseau.<br />
-  Verdicts : CONFORME &middot; CONFORME (PRÉSUMÉ) &middot; NON CONFORME &middot; CONFIGURÉ (NON ACTIF) &middot; INDÉTERMINÉ (non mesuré, pas une non-conformité) &middot; NON APPLICABLE &middot; À VÉRIFIER EN CONSOLE &middot; À TRIER (signal d'historique à corréler) &middot; INFORMATION.<br />
+  Verdicts : CONFORME | CONFORME (PRÉSUMÉ) | NON CONFORME | CONFIGURÉ (NON ACTIF) | INDÉTERMINÉ (non mesuré, pas une non-conformité) | NON APPLICABLE | À VÉRIFIER EN CONSOLE | À TRIER (signal d'historique à corréler) | INFORMATION.<br />
   Document destiné au destinataire de l'audit.
 </footer>
 </body>
@@ -2662,7 +2662,7 @@ if ($OuvrirRapport -and $fichiersGeneres.Count -gt 0) {
 # Priorité : une erreur totale prime, puis les écarts par gravité, puis le
 # caractère non concluant. Le point clé : un audit incomplet (session non
 # élevée, processus 32 bits, ou couverture sous le seuil) ne doit JAMAIS
-# renvoyer 0 « aucun écart » en RMM — ce serait un faux vert sur tout un parc.
+# renvoyer 0 « aucun écart » en RMM, ce serait un faux vert sur tout un parc.
 # $auditNonConcluant est calculé plus haut, avant la génération du rapport.
 
 $codeSortie = 0

@@ -6,7 +6,7 @@
 #  Régénère AGILLY_LOLDrivers_Empreintes.csv à partir de plusieurs sources
 #  publiques, en conservant la provenance de chaque empreinte.
 #
-#  OUTIL DE BUILD — à exécuter sur un poste d'administration disposant d'un
+#  OUTIL DE BUILD, à exécuter sur un poste d'administration disposant d'un
 #  accès réseau, PAS sur un poste client et PAS pendant un audit.
 #
 #  SÉCURITÉ :
@@ -29,7 +29,7 @@
 #
 #  SORTIE : un CSV « ; » au schéma consommé par l'audit
 #           (algo;empreinte;pilote;hvci;sources), une ligne par empreinte,
-#           en UTF-8 avec BOM — encodage à préserver.
+#           en UTF-8 avec BOM, encodage à préserver.
 #           Le script imprime l'empreinte SHA256 du CSV produit et l'écrit
 #           dans un fichier « <nom>.csv.sha256 » adjacent, à publier avec le
 #           CSV. Reporter la même valeur dans $LolDriversSha256 de l'audit
@@ -152,7 +152,7 @@ function Get-Prop {
 }
 
 # ===========================================================================
-#  SOURCE 1 — LOLDrivers (loldrivers.io)
+#  SOURCE 1, LOLDrivers (loldrivers.io)
 # ===========================================================================
 
 function Import-Loldrivers {
@@ -198,12 +198,12 @@ function Import-Loldrivers {
     $statsSource['loldrivers'] = $ajout
     Write-Host ('    ' + $octets + ' octets, ' + $nbLignes + ' enregistrement(s), ' + $ajout + ' empreinte(s) nouvelle(s)') -ForegroundColor DarkGray
     if ($nbLignes -gt 0 -and $ajout -eq 0) {
-        Write-Warning '    LOLDrivers : enregistrements lus mais aucune empreinte extraite — noms de colonnes de hachage inattendus.'
+        Write-Warning '    LOLDrivers : enregistrements lus mais aucune empreinte extraite, noms de colonnes de hachage inattendus.'
     }
 }
 
 # ===========================================================================
-#  SOURCE 1bis — Drapeau HVCI (fichier séparé du repo LOLDrivers)
+#  SOURCE 1bis, Drapeau HVCI (fichier séparé du repo LOLDrivers)
 # ===========================================================================
 
 function Import-HvciFlags {
@@ -252,7 +252,7 @@ function Import-HvciFlags {
 }
 
 # ===========================================================================
-#  SOURCE 2 — Blocklist Microsoft (transformée en empreintes de fichier)
+#  SOURCE 2, Blocklist Microsoft (transformée en empreintes de fichier)
 # ===========================================================================
 
 function Import-MsBlocklist {
@@ -296,12 +296,12 @@ function Import-MsBlocklist {
     $statsSource['ms-blocklist'] = $ajout
     Write-Host ('    ' + $octets + ' octets, ' + $nbLignes + ' enregistrement(s), ' + $ajout + ' empreinte(s) nouvelle(s)') -ForegroundColor DarkGray
     if ($nbLignes -gt 0 -and $ajout -eq 0) {
-        Write-Warning '    Blocklist Microsoft : enregistrements lus mais aucune empreinte extraite — colonne FileHash absente ou renommée.'
+        Write-Warning '    Blocklist Microsoft : enregistrements lus mais aucune empreinte extraite, colonne FileHash absente ou renommée.'
     }
 }
 
 # ===========================================================================
-#  SOURCE 3 — MalwareBazaar (abuse.ch) — OPTIONNEL, nécessite une clé
+#  SOURCE 3, MalwareBazaar (abuse.ch), OPTIONNEL, nécessite une clé
 # ===========================================================================
 
 function Import-MalwareBazaar {
@@ -455,7 +455,7 @@ else {
         if ($cheminSha -ne '') { Write-Host ('  Empreinte : ' + $cheminSha) -ForegroundColor Green }
         Write-Host ''
         Write-Host '  Copier ce fichier à côté du script d''audit sous le nom AGILLY_LOLDrivers_Empreintes.csv,' -ForegroundColor DarkGray
-        Write-Host '  reporter l''empreinte SHA256 ci-dessus dans $LolDriversSha256 de l''audit et au §6 du mémo,' -ForegroundColor DarkGray
+        Write-Host '  reporter l''empreinte SHA256 ci-dessus dans $LolDriversSha256 de l''audit et à la section 6 du mémo,' -ForegroundColor DarkGray
         Write-Host '  et préserver l''encodage UTF-8 avec BOM.' -ForegroundColor DarkGray
     }
 }

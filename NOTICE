@@ -1,11 +1,11 @@
-AGILLY Cyberdéfense — Audit du socle Windows face aux vecteurs d'évasion EDR
+AGILLY Cyberdéfense, Audit du socle Windows face aux vecteurs d'évasion EDR
 Copyright 2026 AGILLY Cyberdéfense
 
 Ce produit inclut des logiciels et des données dérivés des travaux suivants.
 
 -------------------------------------------------------------------------------
-LOLDrivers (Living Off The Land Drivers) — magicsword-io
-https://github.com/magicsword-io/LOLDrivers · https://www.loldrivers.io
+LOLDrivers (Living Off The Land Drivers), magicsword-io
+https://github.com/magicsword-io/LOLDrivers | https://www.loldrivers.io
 Licence Apache 2.0.
 
 Le fichier AGILLY_LOLDrivers_Empreintes.csv est une oeuvre dérivée du
@@ -15,7 +15,7 @@ dédupliquées et croisées avec l'annotation « se charge malgré HVCI »
 provenance de l'entrée.
 
 -------------------------------------------------------------------------------
-Microsoft Vulnerable Driver Block Lists — Cyb3r-Monk (Mehmet E.)
+Microsoft Vulnerable Driver Block Lists, Cyb3r-Monk (Mehmet E.)
 https://github.com/Cyb3r-Monk/Microsoft-Vulnerable-Driver-Block-Lists
 Licence MIT. Copyright (c) 2025 Mehmet E.
 
@@ -28,7 +28,7 @@ La blocklist elle-même est publiée par Microsoft Corporation et reste soumise
 à ses propres conditions.
 
 -------------------------------------------------------------------------------
-MalwareBazaar — abuse.ch
+MalwareBazaar, abuse.ch
 https://bazaar.abuse.ch
 Source optionnelle, DÉSACTIVÉE par défaut dans le script de collecte et NON
 utilisée pour produire le CSV publié ici. Son activation requiert une clé API
